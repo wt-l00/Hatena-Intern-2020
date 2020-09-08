@@ -10,8 +10,8 @@ import (
 
 func Test_Server_Render(t *testing.T) {
 	s := NewServer()
-	src := `foo https://google.com/ bar`
+	src := `[google](https://google.com/)`
 	reply, err := s.Render(context.Background(), &pb.RenderRequest{Src: src})
 	assert.NoError(t, err)
-	assert.Equal(t, `foo <a href="https://google.com/">https://google.com/</a> bar`, reply.Html)
+	assert.Equal(t, "<p><a href=\"https://google.com/\">google</a></p>\n", reply.Html)
 }
