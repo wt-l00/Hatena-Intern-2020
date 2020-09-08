@@ -28,11 +28,10 @@ func Test_Render_Htag(t *testing.T) {
 }
 
 func Test_Render_Link(t *testing.T) {
-	src := "[google](https://google.com/)"
+	src := `[Google](https://google.com)`
 	html, err := Render(context.Background(), src)
 	assert.NoError(t, err)
-	assert.Equal(t, `<p><a href="https://google.com/">google</a></p>
-`, html)
+	assert.Equal(t, "<p><a href=\"https://google.com\">Google</a></p>\n", html)
 }
 
 func Test_Render_List(t *testing.T) {
