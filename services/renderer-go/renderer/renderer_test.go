@@ -9,7 +9,7 @@ import (
 
 func Test_Render_Htag(t *testing.T) {
 	htagTests := []struct {
-		src      string
+		actual   string
 		expected string
 	}{
 		{"# h1", "<h1>h1</h1>\n"},
@@ -21,7 +21,7 @@ func Test_Render_Htag(t *testing.T) {
 	}
 
 	for _, htag := range htagTests {
-		html, err := Render(context.Background(), htag.src)
+		html, err := Render(context.Background(), htag.actual)
 		assert.NoError(t, err)
 		assert.Equal(t, htag.expected, html)
 	}
