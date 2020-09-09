@@ -50,11 +50,15 @@ func ConvertMd(ctx context.Context, src string, fetcherCli pb_fetcher.FetcherCli
 func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			node.AppendChild(node,
-				ast.NewString([]byte(fetchTitle(l.ctx, l.fetcherCli, string(node.Destination)))))
+			appendNode(node, l)
 		}
 		return ast.WalkContinue, nil
 	})
+}
+
+func appendNode(node *ast.Link, l *autoTitleLinker) {
+	title := fetchTitle(l.ctx, l.fetcherCli, string(node.Destination))
+	node.AppendChild(node, ast.NewString([]byte(title)))
 }
 
 // fetchTitle は FetcherClient を使用
