@@ -20,10 +20,10 @@ func NewServer() *Server {
 }
 
 // Fetch は受け取った url から title を取得
-func (s *Server) Fetch(ctx context.Context, in *pb.FetchRequest) (*pb.FetchReply, error) {
+func (s *Server) Fetch(ctx context.Context, in *pb.FetcherRequest) (*pb.FetcherReply, error) {
 	title, err := fetcher.Fetch(ctx, in.Src)
 	if err != nil {
 		return nil, err
 	}
-	return &pb.FetchReply{Title: title}, nil
+	return &pb.FetcherReply{Title: title}, nil
 }
