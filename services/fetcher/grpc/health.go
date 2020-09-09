@@ -15,9 +15,8 @@ import (
 func (s *Server) Check(ctx context.Context, in *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
 	if in.Service == "" || in.Service == "" {
 		return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
-	} else {
-		return nil, status.Error(codes.NotFound, "service not found")
 	}
+	return nil, status.Error(codes.NotFound, "service not found")
 }
 
 // func (s *Server) Watch(req *healthpb.HealthCheckRequest, srv healthpb.Health_WatchServer) error {
