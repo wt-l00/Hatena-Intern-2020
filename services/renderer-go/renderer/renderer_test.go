@@ -48,3 +48,10 @@ func Test_Render_List(t *testing.T) {
 </ul>
 `, html)
 }
+
+func Test_Render_Commentout(t *testing.T) {
+	src := `//TODO: something//`
+	html, err := Render(context.Background(), src)
+	assert.NoError(t, err)
+	assert.Equal(t, "<!-- TODO: something -->", html)
+}
