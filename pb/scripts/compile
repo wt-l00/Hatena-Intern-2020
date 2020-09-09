@@ -52,3 +52,4 @@ docker run -v "$(pwd):/pb" -w /pb --rm hatena-intern-2020-protoc-go \
     fetcher.proto
 mkdir -p ../services/fetcher/pb
 cp -r ./go/fetcher ../services/fetcher/pb
+cp -r ./go/fetcher ../services/renderer-go/pb
