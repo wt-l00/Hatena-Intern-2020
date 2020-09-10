@@ -5,9 +5,5 @@ up:
 	skaffold dev --cleanup=false
 
 .PHONY: down
-<<<<<<< HEAD
 down:
-=======
-clean:
->>>>>>> 69bceca... Add
 	skaffold delete
