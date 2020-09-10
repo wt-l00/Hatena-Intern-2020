@@ -22,15 +22,15 @@ type autoTitleLinker struct {
 
 // Render は受け取った文書をHTMLとして返す
 func Render(ctx context.Context, src string, fetcherClient pb_fetcher.FetcherClient) (string, error) {
-	html, err := ConvertMd(ctx, src, fetcherClient)
+	html, err := ConvertMdtoHTML(ctx, src, fetcherClient)
 	if err != nil {
 		return "", err
 	}
 	return html, nil
 }
 
-// ConvertMd は受け取った文書（markdown）を HTMLに変換する
-func ConvertMd(ctx context.Context, src string, fetcherCli pb_fetcher.FetcherClient) (string, error) {
+// ConvertMdtoHTML は受け取った文書（markdown）を HTMLに変換する
+func ConvertMdtoHTML(ctx context.Context, src string, fetcherCli pb_fetcher.FetcherClient) (string, error) {
 	var buf bytes.Buffer
 	var md = goldmark.New(
 		goldmark.WithParserOptions(
@@ -83,11 +83,6 @@ func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 			node.AppendChild(node, ast.NewString([]byte(urlTitle[url])))
 		}
 	}
-}
-
-func appendNode(node *ast.Link, l *autoTitleLinker) {
-	title := fetchTitle(l.ctx, l.fetcherCli, string(node.Destination))
-	node.AppendChild(node, ast.NewString([]byte(title)))
 }
 
 // fetchTitle は FetcherClient を使用
