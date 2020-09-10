@@ -9,10 +9,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-type fetcherClientInterface interface {
-	Fetch(ctx context.Context, in *pb_fetcher.FetcherRequest, opts ...grpc.CallOption) (*pb_fetcher.FetcherReply, error)
-}
-
 type mockedFetcherClient struct {
 	returnValue string
 }
