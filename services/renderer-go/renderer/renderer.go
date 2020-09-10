@@ -20,11 +20,6 @@ type autoTitleLinker struct {
 	fetcherCli pb_fetcher.FetcherClient
 }
 
-type fetchTarget struct {
-	url   string
-	title string
-}
-
 // Render は受け取った文書をHTMLとして返す
 func Render(ctx context.Context, src string, fetcherClient pb_fetcher.FetcherClient) (string, error) {
 	html, err := ConvertMd(ctx, src, fetcherClient)
