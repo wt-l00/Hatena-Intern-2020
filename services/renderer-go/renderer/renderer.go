@@ -3,6 +3,8 @@ package renderer
 import (
 	"bytes"
 	"context"
+	"runtime"
+	"sync"
 
 	pb_fetcher "github.com/wt-l00/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
 	commentout "github.com/wt-l00/goldmark-commentout"
@@ -16,6 +18,11 @@ import (
 type autoTitleLinker struct {
 	ctx        context.Context
 	fetcherCli pb_fetcher.FetcherClient
+}
+
+type fetchTarget struct {
+	url   string
+	title string
 }
 
 // Render は受け取った文書をHTMLとして返す
@@ -48,12 +55,39 @@ func ConvertMd(ctx context.Context, src string, fetcherCli pb_fetcher.FetcherCli
 }
 
 func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc parser.Context) {
+	// url と nodeの関係を取り持つ．1 url : n node
+	urlNodes := make(map[string][]*ast.Link)
+	// url と titleの関係を取り持つ． 1 url : 1 title
+	urlTitle := make(map[string]string)
+
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
-			appendNode(node, l)
+			urlNodes[string(node.Destination)] = append(urlNodes[string(node.Destination)], node)
 		}
 		return ast.WalkContinue, nil
 	})
+
+	wg := sync.WaitGroup{}
+	// 並列度を制限するため．
+	semaphore := make(chan int, runtime.NumCPU())
+
+	for url := range urlNodes {
+		wg.Add(1)
+		go func(url string) {
+			defer wg.Done()
+			semaphore <- 1
+			title := fetchTitle(l.ctx, l.fetcherCli, url)
+			urlTitle[url] = title
+			<-semaphore
+		}(url)
+	}
+	wg.Wait()
+
+	for url, nodes := range urlNodes {
+		for _, node := range nodes {
+			node.AppendChild(node, ast.NewString([]byte(urlTitle[url])))
+		}
+	}
 }
 
 func appendNode(node *ast.Link, l *autoTitleLinker) {
@@ -65,7 +99,7 @@ func appendNode(node *ast.Link, l *autoTitleLinker) {
 func fetchTitle(ctx context.Context, fetcherCli pb_fetcher.FetcherClient, url string) string {
 	reply, err := fetcherCli.Fetch(ctx, &pb_fetcher.FetcherRequest{Src: url})
 	if err != nil {
-		return ""
+		return url
 	}
 	return reply.Title
 }
