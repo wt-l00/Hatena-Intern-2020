@@ -8,9 +8,15 @@ import (
 )
 
 func Test_Fetch_Title(t *testing.T) {
-	url := "https://example.com/"
-	extected := "Example Domain"
-	title, err := Fetch(context.Background(), url)
-	assert.NoError(t, err)
-	assert.Equal(t, extected, title)
+	fetchTests := []struct {
+		url           string
+		expectedTitle string
+	}{
+		{"https://github.com", "The world’s leading software development platform · GitHub"},
+	}
+	for _, url := range fetchTests {
+		title, err := Fetch(context.Background(), url.url)
+		assert.NoError(t, err)
+		assert.Equal(t, title, url.expectedTitle)
+	}
 }
