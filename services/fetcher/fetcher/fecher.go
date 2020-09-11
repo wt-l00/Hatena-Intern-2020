@@ -35,7 +35,7 @@ func getTitleFromHTML(r io.Reader) (string, bool) {
 	return scanHTML(doc)
 }
 
-func checkRobotstxt(urlrequest string) bool {
+func isDisallowedByRobotstxt(urlrequest string) bool {
 	pu, err := url.Parse(urlrequest)
 	if err != nil {
 		return false
@@ -52,18 +52,15 @@ func checkRobotstxt(urlrequest string) bool {
 	if err != nil {
 		return false
 	}
-
 	group := robotsData.FindGroup("*")
-	if group.Test(pu.Path) {
-		return true
-	}
-	return false
+
+	return group.Test(pu.Path)
 }
 
 // Fetch title form url.
 func Fetch(ctx context.Context, requestURL string) (string, error) {
 
-	if !checkRobotstxt(requestURL) {
+	if isDisallowedByRobotstxt(requestURL) {
 		return requestURL, nil
 	}
 	resp, err := http.Get(requestURL)
