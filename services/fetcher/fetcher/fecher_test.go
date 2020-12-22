@@ -8,9 +8,18 @@ import (
 )
 
 func Test_Fetch_Title(t *testing.T) {
-	url := "https://example.com/"
-	extected := "Example Domain"
-	title, err := Fetch(context.Background(), url)
-	assert.NoError(t, err)
-	assert.Equal(t, extected, title)
+	fetchTests := []struct {
+		url           string
+		expectedTitle string
+	}{
+		{"https://www.google.com/search/about/", "Google Search - Stay in the Know with Your Google App"},
+		{"https://books.google.com/books/about/ ", "Google Books"},
+		{"https://hatenablog.com/api/", "https://hatenablog.com/api/"},
+	}
+
+	for _, fetchTest := range fetchTests {
+		title, err := Fetch(context.Background(), fetchTest.url)
+		assert.NoError(t, err)
+		assert.Equal(t, fetchTest.expectedTitle, title)
+	}
 }

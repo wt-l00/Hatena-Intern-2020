@@ -4,7 +4,10 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"net/url"
+	"strings"
 
+	"github.com/temoto/robotstxt"
 	"golang.org/x/net/html"
 )
 
@@ -32,11 +35,38 @@ func getTitleFromHTML(r io.Reader) (string, bool) {
 	return scanHTML(doc)
 }
 
-// Fetch title form url.
-func Fetch(ctx context.Context, url string) (string, error) {
-	resp, err := http.Get(url)
+func isDisallowedByRobotstxt(urlrequest string) (bool, error) {
+	pu, err := url.Parse(urlrequest)
 	if err != nil {
-		return url, err
+		return false, err
+	}
+	robotsURL := strings.Join([]string{"https://", pu.Host, "/robots.txt"}, "")
+
+	resp, err := http.Get(robotsURL)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	robotsData, err := robotstxt.FromResponse(resp)
+	if err != nil {
+		return false, err
+	}
+	group := robotsData.FindGroup("*")
+
+	return !group.Test(pu.Path), nil
+}
+
+// Fetch title form url.
+func Fetch(ctx context.Context, requestURL string) (string, error) {
+
+	ok, err := isDisallowedByRobotstxt(requestURL)
+	if ok || err != nil {
+		return requestURL, nil
+	}
+	resp, err := http.Get(requestURL)
+	if err != nil {
+		return requestURL, err
 	}
 	defer resp.Body.Close()
 
@@ -44,5 +74,5 @@ func Fetch(ctx context.Context, url string) (string, error) {
 		return title, nil
 	}
 	// titleが取得できない場合はurlを返しておきます
-	return url, nil
+	return requestURL, nil
 }
