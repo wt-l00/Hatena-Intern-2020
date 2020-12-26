@@ -3,7 +3,6 @@ package renderer
 import (
 	"bytes"
 	"context"
-	"runtime"
 	"sync"
 
 	pb_fetcher "github.com/wt-l00/Hatena-Intern-2020/services/renderer-go/pb/fetcher"
@@ -63,17 +62,13 @@ func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 	})
 
 	wg := sync.WaitGroup{}
-	// 並列度を制限するため．
-	semaphore := make(chan int, runtime.NumCPU())
 
 	for url := range urlNodes {
 		wg.Add(1)
 		go func(url string) {
 			defer wg.Done()
-			semaphore <- 1
 			title := fetchTitle(l.ctx, l.fetcherCli, url)
 			urlTitle[url] = title
-			<-semaphore
 		}(url)
 	}
 	wg.Wait()
