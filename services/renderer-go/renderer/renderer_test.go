@@ -88,3 +88,14 @@ func Test_Render_Autolink(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "<p><a href=\"https://example.com\">Example Domain</a></p>\n", html)
 }
+func Test_Render_Manylinks(t *testing.T) {
+	fetcherCli := &mockedFetcherClient{
+		returnValue: "Example Domain",
+	}
+	src := `[](https://example.com)
+[](https://example.com)
+[](https://example.com)`
+	html, err := Render(context.Background(), src, fetcherCli)
+	assert.NoError(t, err)
+	assert.Equal(t, "<p><a href=\"https://example.com\">Example Domain</a>\n<a href=\"https://example.com\">Example Domain</a>\n<a href=\"https://example.com\">Example Domain</a></p>\n", html)
+}
