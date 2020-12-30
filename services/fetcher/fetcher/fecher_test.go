@@ -15,6 +15,7 @@ func Test_Fetch_Title(t *testing.T) {
 		{"https://www.google.com/search/about/", "Google Search - Stay in the Know with Your Google App"},
 		{"https://books.google.com/books/about/ ", "Google Books"},
 		{"https://hatenablog.com/api/", "https://hatenablog.com/api/"},
+        {"https://example.com", "Example Domain"},
 	}
 
 	for _, fetchTest := range fetchTests {
