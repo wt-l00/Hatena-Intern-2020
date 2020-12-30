@@ -52,7 +52,7 @@ func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 	// url と nodeの関係を取り持つ．1 url : n node
 	urlNodes := make(map[string][]*ast.Link)
 	// url と titleの関係を取り持つ． 1 url : 1 title
-	urlTitle := make(map[string]string)
+	var urlTitle sync.Map
 
 	ast.Walk(node, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 		if node, ok := node.(*ast.Link); ok && entering && node.ChildCount() == 0 {
@@ -68,14 +68,16 @@ func (l *autoTitleLinker) Transform(node *ast.Document, reader text.Reader, pc p
 		go func(url string) {
 			defer wg.Done()
 			title := fetchTitle(l.ctx, l.fetcherCli, url)
-			urlTitle[url] = title
+			urlTitle.Store(url, title)
 		}(url)
 	}
 	wg.Wait()
 
 	for url, nodes := range urlNodes {
 		for _, node := range nodes {
-			node.AppendChild(node, ast.NewString([]byte(urlTitle[url])))
+			if title, ok := urlTitle.Load(url); ok {
+				node.AppendChild(node, ast.NewString([]byte(title.(string))))
+			}
 		}
 	}
 }
